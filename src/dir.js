@@ -24,7 +24,7 @@ module.exports = function (commander, filenames) {
   let tasks = [];
   let runningTasks = 0;
 
-  const ncpus = os.cpus().length;
+  const ncpus = commander.concurrency || os.cpus().length;
   for (var i = 0; i < ncpus; i++) {
     workers.push({
       worker: cluster.fork(),
@@ -48,7 +48,8 @@ module.exports = function (commander, filenames) {
   }
 
   function tryWork() {
-    for (var i = 0, len = workers.length; i < len; i++) {
+    var i = workers.length;
+    while (i--) {
       if (!workers[i].busy) {
         let task = tasks.pop();
         if (!task) {
@@ -121,29 +122,5 @@ module.exports = function (commander, filenames) {
     }
   }
 
-  if (!commander.skipInitialBuild) {
-    _.each(filenames, handle);
-  }
-
-  if (commander.watch) {
-    let chokidar = util.requireChokidar();
-
-    _.each(filenames, function (dirname) {
-      let watcher = chokidar.watch(dirname, {
-        persistent: true,
-        ignoreInitial: true
-      });
-
-      _.each(["add", "change"], function (type) {
-        watcher.on(type, function (filename) {
-          let relative = path.relative(dirname, filename) || filename;
-          try {
-            handleFile(filename, relative);
-          } catch (err) {
-            console.error(err.stack);
-          }
-        });
-      });
-    });
-  }
+  _.each(filenames, handle);
 };
