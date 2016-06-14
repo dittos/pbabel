@@ -29,10 +29,10 @@ user	0m7.904s
 sys	0m1.912s
 ```
 
-Compared to original babel-cli:
+Compared to the original babel-cli:
 
 ```sh
-$ ./node_modules/.bin/babel -d serial frontend/js -q
+$ time ./node_modules/.bin/babel -d serial frontend/js -q
 
 real	0m4.346s
 user	0m4.152s
